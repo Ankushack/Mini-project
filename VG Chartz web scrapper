@@ -1,0 +1,61 @@
+from selenium import webdriver
+from webdriver_manager import driver
+from webdriver_manager.chrome import ChromeDriverManager
+import pandas as pd
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
+data=[]  # To store scrapped data
+for i in range(5): # To scrap through pages
+    webpage = f'https://www.vgchartz.com/games/games.php?page={i+1}'
+    driver.get(webpage)
+
+    target = driver.find_element_by_css_selector('div#generalBody')   
+    games = target.find_elements_by_css_selector('tr') 
+    
+    # loop through all the news
+    
+    for item in games:
+        head=item.find_elements_by_css_selector('td')  
+
+        try:
+            posi = head[0].text
+        except:
+            posi = ""
+        try:
+            name=head[2].text
+        except:
+            name = ""
+        try:
+            publisher = head[4].text
+        except:
+            publisher =  ""
+        try:
+            Total_S = head[8].text
+        except:
+            Total_S = ""
+
+        try :
+            r_d=head[9].text
+        except:
+            r_d=""
+
+        try:
+            l_u=head[10].text
+        except:
+            l_u=""
+
+        data.append({
+            'Position ':posi,
+            'Name':name,
+            'Publisher':publisher,
+            'Total Shipped':Total_S,
+            'Release Date':r_d,
+            'Last Update':l_u
+        })
+        
+
+if len(data) > 0:
+    pd.DataFrame(data).to_csv('Vgchartz.csv')
+else:
+    print("NO Data !!")
+driver.close()
